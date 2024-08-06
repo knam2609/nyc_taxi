@@ -3,7 +3,6 @@ from urllib.request import urlretrieve
 from typing import List
 
 def make_directories(output_relative_dir: str, target_dirs: List[str]):
-
     if not os.path.exists(output_relative_dir):
         os.makedirs(output_relative_dir)
     

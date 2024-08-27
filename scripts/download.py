@@ -1,8 +1,7 @@
 import os
 from urllib.request import urlretrieve
-from typing import List
 
-def make_directories(output_relative_dirs: List[str], target_dirs: List[str]):
+def make_directories(output_relative_dirs: list[str], target_dirs: list[str]):
     """Create directories for data"""
     for ord in output_relative_dirs:
         if not os.path.exists(ord): # check if directories already exist
@@ -11,7 +10,7 @@ def make_directories(output_relative_dirs: List[str], target_dirs: List[str]):
             if not os.path.exists(ord + td): # check if directories already exist
                 os.makedirs(ord + td)
 
-def download_files(url_template: str, output_dir: str, year: int, months: List[int]):
+def download_files(url_template: str, output_dir: str, year: int, months: list[int]):
     """Download data from url"""
     for month in months:
         month = str(month).zfill(2)

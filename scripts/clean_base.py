@@ -1,23 +1,38 @@
 import os
 import datetime
-from typing import List
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import col
 from pyspark.sql.types import TimestampNTZType
 
 def create_spark_session():
     """Create and return a Spark session."""
-    spark = SparkSession.builder \
-        .appName("Project 1") \
-        .config("spark.executor.memory", "8g") \
-        .getOrCreate()    
+    spark = (
+        SparkSession.builder.appName("OptimizedSparkApp") 
+        .config("spark.executor.memory", "4g") 
+        .config("spark.driver.memory", "4g")  
+        .config("spark.memory.fraction", "0.8") 
+        .config("spark.memory.storageFraction", "0.5")  
+        .config("spark.executor.cores", "2")  
+        .config("spark.executor.instances", "3")  
+        .config("spark.dynamicAllocation.enabled", "true")  
+        .config("spark.dynamicAllocation.initialExecutors", "2")  
+        .config("spark.dynamicAllocation.minExecutors", "1")  
+        .config("spark.dynamicAllocation.maxExecutors", "10")  
+        .config("spark.dynamicAllocation.executorIdleTimeout", "120s")  
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")  
+        .config("spark.sql.shuffle.partitions", "200")  
+        .config("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35")  
+        .config("spark.sql.repl.eagerEval.enabled", True) 
+        .config("spark.sql.parquet.cacheMetadata", "true") 
+        .getOrCreate()
+    )    
     return spark
 
 def read_data(spark: SparkSession, directory_path: str, file_format='parquet'):
     """Reads all data from a directory with the specified file format."""
     return spark.read.format(file_format).load(directory_path)
 
-def rename_column(df: DataFrame, old_name: List[str], new_name: List[str]):
+def rename_column(df: DataFrame, old_name: list[str], new_name: list[str]):
     """Rename columns"""
     for i in range(len(old_name)):
         df = df.withColumnRenamed(old_name[i], new_name[i])
@@ -58,17 +73,30 @@ def drop_invalid_time(df: DataFrame, start_time: str, end_time: str):
         print(f"Filtered data for column {column}:")
     return df
 
-def drop_invalid_non_positive_value(df: DataFrame, column_name: str):
-    """Remove rows with non-positive values when they should be all positive"""
-    return df.filter(df[column_name] > 0)
+def drop_invalid_negative_value(df: DataFrame, columns: list[str]):
+    """Remove rows with negative values when they should be all >= 0"""
+    for col in columns:
+        df = df.filter(df[col] >= 0)
+    return df
 
-def sampling_data(df: DataFrame, column_name: str, subset: float):
+def drop_invalid_non_positive_value(df: DataFrame, columns: list[str]):
+    """Remove rows with non_postive values when they should be all positive"""
+    for col in columns:
+        df = df.filter(df[col] > 0)
+    return df
+    
+def drop_abnormal_high_values(df: DataFrame, column: str, upper_bound: float):
+    """Drop records of column with values > upper_bound"""
+    return df.filter(df[column] < upper_bound)
+
+def drop_outliers(df: DataFrame, column: str, lower_bound: float, upper_bound: float):
+    "Drop outliers of column"
+    return df.filter(~((col(column) < lower_bound) | (col(column) > upper_bound)))
+
+def sampling_data(df: DataFrame, column_name: str, fraction: float):
     """Stratified sampling data based on the distribution of the column"""
-    # Count each HVFHV license number and calculate fractions for sampling
-    distinct_values = df.select(column_name).distinct().collect()
-    #total_count = df.count()
-    fractions = {row[column_name]: subset for row in distinct_values}
-    print(fractions)
+    # Create fractions dict for sampling
+    fractions = {key: fraction for key in df.select(column_name).distinct().rdd.flatMap(lambda x: x).collect()}
     # Perform stratified sampling
     sampled_df = df.stat.sampleBy(column_name, fractions, seed=42)
     return sampled_df
@@ -80,3 +108,12 @@ def write_data(df: DataFrame, output_path: str, file_format='parquet'):
 def list_files_in_directory(directory_path: str):
     """Lists all files in a directory."""
     return [os.path.join(directory_path, f) for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
+
+def list_parquet_directories(directory_path: str):
+    """Lists directories that likely contain parquet files."""
+    directories = []
+    for entry in os.listdir(directory_path):
+        full_path = os.path.join(directory_path, entry)
+        if os.path.isdir(full_path):
+            directories.append(full_path)
+    return directories

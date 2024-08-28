@@ -1,7 +1,7 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Yi0Zbe2y)
 # MAST30034 Project 1 README.md
-- Name: `INSERT YOUR NAME HERE`
-- Student ID: `INSERT YOUR STUDENT ID HERE`
+- Name: `Khanh Nam Nguyen`
+- Student ID: `1367184`
 
 ## Student Instructions
 You **must** write up `README.md` for this repository to be eligable for readability marks.
@@ -19,15 +19,18 @@ You **must** write up `README.md` for this repository to be eligable for readabi
 
 Remember, we will be reading through and running your code, so it is in _your best interest_ to ensure it is readable and efficient.
 
-## README example
-This is an example `README.md` for students to use. **Please change this to your requirements**.
+## Instruction for Codes
+**Research Goal:** Comparing Uber and Yellow Taxi to understand why high-tech transportation is now superior.
+**Timeline:** The timeline for the research area is June 2023 - November 2023.
 
-**Research Goal:** My research goal is tip analysis for credit card payments
+To run the pipeline, please visit `notebooks` and run the files in order:
+1. `Download_Data.ipynb`: This downloads the data needed from TLC website to `data/landing`
+2. `Inspect_Landing_Data.ipynb`: This notebook is to briefly go through data's content before cleaning
+3. `Clean_Data.ipynb`: This cleans the data and save them into `data/raw`
+4. `Analyze_{Yellow_Taxi, Uber}.ipynb`: These analyze the data and draw plots
+5. `Visualise_Spatial_{Yellow, Uber}_Data.ipynb`: These draw interactive maps to show how geography effects data's attributes
+6. `Weather_Data.ipynb`: This download, process and join weather data to curated datasets
+6. `Model_{Yellow, Uber}.ipynb`: These use Linear Regression to predict future data based on past data
 
-**Timeline:** The timeline for the research area is 2018 - 2021.
-
-To run the pipeline, please visit the `scripts` directory and run the files in order:
-1. `download.py`: This downloads the raw data into the `data/landing` directory.
-2. `preprocess.ipynb`: This notebook details all preprocessing steps and outputs it to the `data/raw` and `data/curated` directory.
-3. `analysis.ipynb`: This notebook is used to conduct analysis on the curated data.
-4. `model.py` and `model_analysis.ipynb`: The script is used to run the model from CLI and the notebook is used for analysing and discussing the model.
+## Warning
+In every notebooks, there is the first cell which I use to adjust python path to the notebook, please delete it if you do not need it or change it into your own path.

@@ -14,7 +14,7 @@ def scatter_plot(df: DataFrame, x_axis: str, y_axis: str, type: str, output_path
     plt.grid(True)
     plt.tight_layout()  # Adjusts plot to ensure everything fits without overlap
     # Save plot to file
-    plot_file = f"{output_path}{x_axis}_vs_{y_axis}_histogram.png"
+    plot_file = f"{output_path}{x_axis}_vs_{y_axis}.png"
     print(plot_file)
     plt.savefig(plot_file)
     plt.close()
